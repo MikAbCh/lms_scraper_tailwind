@@ -1,6 +1,3 @@
-Berikut adalah dokumentasi file `README.md` lengkap dari awal sampai akhir dalam format kode yang siap Anda salin (*copyable*):
-
-```markdown
 # LEAPS Automation & Assignment Tracker
 
 Aplikasi pemantau tugas dan jadwal kuliah interaktif yang terintegrasi secara otomatis dengan LMS LEAPS Kalbis. Sistem ini menggunakan backend **Node.js Express** berbasis **Puppeteer** untuk penanganan autentikasi otomatis, serta scraping data menggunakan **Cheerio**.
@@ -44,7 +41,6 @@ Buka terminal dan jalankan perintah berikut:
 ```bash
 git clone [https://github.com/username/repository-name.git](https://github.com/username/repository-name.git)
 cd repository-name
-
 ```
 
 ### 2. Instalasi Dependensi
