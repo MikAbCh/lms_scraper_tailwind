@@ -1,6 +1,6 @@
 # LEAPS Automation & Assignment Tracker
 
-Aplikasi pemantau tugas dan jadwal kuliah interaktif yang terintegrasi secara otomatis dengan LMS LEAPS Kalbis. Sistem ini menggunakan backend **Node.js Express** berbasis **Puppeteer** untuk penanganan autentikasi otomatis, serta scraping data menggunakan **Cheerio**.
+Aplikasi pemantau tugas dan jadwal kuliah interaktif yang terintegrasi secara otomatis dengan LMS LEAPS. Sistem ini menggunakan backend **Node.js Express** berbasis **Puppeteer** untuk penanganan autentikasi otomatis, serta scraping data menggunakan **Cheerio**.
 
 ---
 
