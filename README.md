@@ -102,7 +102,7 @@ Apabila sesi penggunaan telah selesai:
 
 * **Google Chrome Tidak Ditemukan**: Pastikan jalur `executablePath` di dalam file `server.js` mengarah ke lokasi eksekusi Google Chrome yang valid di komputer Anda (misal: `C:\Program Files\Google\Chrome\Application\chrome.exe`).
 * **Session Expired (Status 401/419)**: Jika sesi cookie kampus telah kedaluwarsa, backend secara otomatis mereset cookie dan akan memicu jendela Puppeteer baru untuk login ulang pada pemanggilan endpoint berikutnya.
-* **Tugas Tidak Muncul / Error Scraper**: Pastikan struktur koneksi internet stabil dan halaman LEAPS Kalbis dapat diakses tanpa kendala maintenance.
+* **Tugas Tidak Muncul / Error Scraper**: Pastikan struktur koneksi internet stabil dan halaman LEAPS dapat diakses tanpa kendala maintenance.
 
 ```
 
