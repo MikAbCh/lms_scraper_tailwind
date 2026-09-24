@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS Alternative Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/c3e8f1a656.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden">
+    
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 h-16 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="btn-hamburger" class="p-2 hover:bg-slate-100 rounded-full transition">
+                <i class="fa-solid fa-bars text-slate-600 text-lg"></i>
+            </button>
+            <div class="flex items-baseline gap-2">
+                <span class="text-xl font-bold tracking-tight text-indigo-600">LMS LEAPS</span>
+                <span class="text-xs bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full text-indigo-500 font-medium">Live Connection</span>
+            </div>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold flex items-center justify-center text-sm shadow-sm cursor-pointer hover:opacity-90 transition">
+            MR
+        </div>
+    </header>
+
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full transition-transform duration-300 ease-in-out pt-16 shadow-lg">
+        <nav class="p-4 space-y-2">
+            <button id="menu-tasks" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm transition">
+                <i class="fa-solid fa-list-check"></i> All Assignments
+            </button>
+            <button id="menu-courses" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+                <i class="fa-solid fa-book-bookmark"></i> Course Dashboard
+            </button>
+        </nav>
+    </div>
+    <div id="sidebar-overlay" class="fixed inset-0 z-30 bg-slate-900/20 hidden transition-opacity"></div>
+
+    <div class="max-w-md mx-auto px-4 py-6 space-y-6">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+            <label for="param_idschedules" class="text-xs font-bold uppercase tracking-wider text-slate-400">Pilih Semester Akademik</label>
+            <select id="param_idschedules" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 font-medium focus:outline-none focus:border-indigo-500 transition">
+                <option value="47">2026/2027 - Odd</option>
+                <option value="46" selected>2025/2026 - Short</option>
+                <option value="45">2025/2026 - Even</option>
+                <option value="44">2025/2026 - Odd</option>
+                <option value="43">2024/2025 - Short</option>
+                <option value="42">2024/2025 - Even</option>
+                <option value="41">2024/2025 - Odd</option>
+            </select>
+        </div>
+
+        <!-- VIEW ASSIGNMENTS -->
+        <div id="view-tasks" class="space-y-4">
+            <div class="text-center pb-2 flex items-center justify-between">
+                <div class="text-left">
+                    <h2 class="text-xl font-bold text-slate-800">Assignments</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Scraped data from LMS</p>
+                </div>
+                <button id="btn_fetch_tasks" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold text-xs shadow-sm hover:bg-indigo-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Tarik Semua Tugas
+                </button>
+            </div>
+
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="filter-course" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Filter Matkul</label>
+                        <select id="filter-course" onchange="applyFilterAndSort()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:border-indigo-500 transition">
+                            <option value="all">Semua Mata Kuliah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sort-date" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Urutan Batas Waktu</label>
+                        <select id="sort-date" onchange="applyFilterAndSort()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:border-indigo-500 transition">
+                            <option value="near">Paling Mendekati Deadline</option>
+                            <option value="far">Paling Jauh / Menurun</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
+                    <div>
+                        <label for="filter-start-date" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tanggal Mulai</label>
+                        <input type="date" id="filter-start-date" onchange="applyFilterAndSort()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:border-indigo-500 transition" />
+                    </div>
+                    <div>
+                        <label for="filter-end-date" class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tanggal Selesai</label>
+                        <input type="date" id="filter-end-date" onchange="applyFilterAndSort()" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:border-indigo-500 transition" />
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="resetDateFilter()" class="text-[10px] text-rose-500 hover:text-rose-600 font-semibold transition"><i class="fa-solid fa-arrow-rotate-left mr-1"></i>Reset Rentang Tanggal</button>
+                </div>
+            </div>
+
+            <div id="task-list" class="space-y-4">
+                <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-500 text-sm">
+                    <i class="fa-solid fa-circle-info mr-2 text-indigo-500"></i> Silakan klik tombol <b>"Tarik Semua Tugas"</b> di kanan atas untuk memuat data tugas.
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW COURSES -->
+        <div id="view-courses" class="space-y-4 hidden">
+            <div class="text-center pb-2 flex items-center justify-between">
+                <div class="text-left">
+                    <h2 class="text-xl font-bold text-slate-800">Course Dashboard</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Ringkasan Jadwal Rutin Kelas</p>
+                </div>
+                <button id="btn_fetch_dashboard" class="px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold text-xs shadow-sm hover:bg-emerald-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate"></i> Muat Jadwal Kelas
+                </button>
+            </div>
+            <div id="course-card-list" class="space-y-3">
+                <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-400 text-sm">
+                    <i class="fa-solid fa-folder-open text-slate-300 text-xl block mb-2"></i> Silakan klik tombol <b>"Muat Jadwal Kelas"</b> untuk memuat kartu kelas secara instan.
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW COURSE DETAIL -->
+        <div id="view-course-detail" class="space-y-4 hidden">
+            <button onclick="backToCourseList()" class="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Matkul
+            </button>
+            <div id="detail-course-header" class="bg-indigo-600 p-5 rounded-2xl text-white shadow-sm"></div>
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-calendar-day mr-1"></i> Sesi Aktif Terdekat</h3>
+                <div id="detail-session-container"></div>
+            </div>
+            <div class="bg-white border border-slate-200 border-dashed shadow-sm rounded-2xl p-5 text-center text-slate-400 text-xs py-8">
+                <i class="fa-solid fa-cubes text-slate-300 text-lg block mb-1.5"></i> Slot Ekspansi Fitur Masa Depan
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ALL_TASKS = [];
+        let ALL_COURSES = [];
+        let countdownIntervalId = null;
+
+        const btnHamburger = document.getElementById('btn-hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const menuTasks = document.getElementById('menu-tasks');
+        const menuCourses = document.getElementById('menu-courses');
+        const viewTasks = document.getElementById('view-tasks');
+        const viewCourses = document.getElementById('view-courses');
+        const viewCourseDetail = document.getElementById('view-course-detail');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        btnHamburger.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        menuTasks.addEventListener('click', () => {
+            viewTasks.classList.remove('hidden');
+            viewCourses.classList.add('hidden');
+            viewCourseDetail.classList.add('hidden');
+            menuTasks.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm transition";
+            menuCourses.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition";
+            toggleSidebar();
+        });
+
+        menuCourses.addEventListener('click', () => {
+            viewCourses.classList.remove('hidden');
+            viewTasks.classList.add('hidden');
+            viewCourseDetail.classList.add('hidden');
+            menuCourses.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm transition";
+            menuTasks.className = "w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition";
+            toggleSidebar();
+            renderCourseCards();
+        });
+
+        function backToCourseList() {
+            viewCourseDetail.classList.add('hidden');
+            viewCourses.classList.remove('hidden');
+        }
+
+        function resetDateFilter() {
+            document.getElementById('filter-start-date').value = '';
+            document.getElementById('filter-end-date').value = '';
+            applyFilterAndSort();
+        }
+
+        // AMBIL JADWAL DASHBOARD
+        document.getElementById('btn_fetch_dashboard').addEventListener('click', async () => {
+            const selectedSemester = document.getElementById('param_idschedules').value;
+            const btn = document.getElementById('btn_fetch_dashboard');
+            const containerCourses = document.getElementById('course-card-list');
+
+            btn.innerText = "⏳ Loading...";
+            btn.disabled = true;
+            containerCourses.innerHTML = `
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-500 text-sm">
+                <i class="fa-solid fa-circle-notch fa-spin mr-2 text-emerald-600"></i> Mengambil data jadwal kelas instan dari LEAPS...
+            </div>`;
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/dashboard-courses?semester=${selectedSemester}`);
+                const result = await res.json();
+                if (result.success) {
+                    ALL_COURSES = result.courses || [];
+                    renderCourseCards();
+                } else {
+                    alert(`Gagal memuat dashboard: ${result.error}`);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-rotate"></i> Muat Jadwal Kelas`;
+                btn.disabled = false;
+            }
+        });
+
+        // AMBIL DATA TUGAS
+        document.getElementById('btn_fetch_tasks').addEventListener('click', async () => {
+            const selectedSemester = document.getElementById('param_idschedules').value;
+            const btn = document.getElementById('btn_fetch_tasks');
+            const containerTasks = document.getElementById('task-list');
+
+            btn.innerText = "⏳ Scraping...";
+            btn.disabled = true;
+            containerTasks.innerHTML = `
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-500 text-sm">
+                <i class="fa-solid fa-circle-notch fa-spin mr-2 text-indigo-600"></i> Memulai pengerukan beruntun seluruh halaman tugas (Mohon tunggu)...
+            </div>`;
+
+            try {
+                const responseTasks = await fetch(`http://localhost:5000/api/tasks?semester=${selectedSemester}`);
+                const resultTasks = await responseTasks.json();
+                if (resultTasks.success) {
+                    ALL_TASKS = resultTasks.data;
+                    populateFilterOptions();
+                    if (countdownIntervalId) clearInterval(countdownIntervalId);
+                    applyFilterAndSort();
+                    countdownIntervalId = setInterval(applyFilterAndSort, 1000);
+                } else {
+                    alert(`Gagal mengambil data tugas: ${resultTasks.error}`);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-down"></i> Tarik Semua Tugas`;
+                btn.disabled = false;
+            }
+        });
+
+        // ─── 🛠️ MODIFIKASI: RENDER KARTU DENGAN SUPPORT ARRAY SCHEDULES ───
+        function renderCourseCards() {
+            const container = document.getElementById('course-card-list');
+            if (!container) return;
+
+            if (ALL_COURSES.length === 0) {
+                container.innerHTML = `
+                <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-400 text-sm">
+                    <i class="fa-solid fa-folder-open text-slate-300 text-xl block mb-2"></i> Belum ada data. Silakan klik "Muat Jadwal Kelas" di kanan atas.
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            ALL_COURSES.forEach(course => {
+                let schedulesHTML = '';
+
+                // Cek apakah data course memiliki array schedules
+                if (Array.isArray(course.schedules) && course.schedules.length > 0) {
+                    schedulesHTML = course.schedules.map(sch => `
+                        <div class="pt-2 border-t border-slate-100 first:border-0 first:pt-0 space-y-1">
+                            <div class="flex items-center justify-between text-slate-600 font-medium">
+                                <div><i class="fa-regular fa-calendar-minus mr-1 text-indigo-500"></i> ${sch.day || sch.dayName || '-'}</div>
+                                <div><i class="fa-regular fa-clock mr-1 text-indigo-500"></i> ${sch.time || sch.timeSlot || '-'}</div>
+                            </div>
+                            <div class="truncate text-slate-500"><i class="fa-solid fa-map-location-dot mr-1 text-slate-400"></i> Ruang: ${sch.room || sch.roomName || '-'}</div>
+                            ${sch.lecturer ? `<div class="truncate font-medium text-slate-600"><i class="fa-solid fa-chalkboard-user mr-1 text-slate-400"></i> ${sch.lecturer}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    // Fallback jika berupa properti tunggal
+                    schedulesHTML = `
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-slate-600 font-medium">
+                                <div><i class="fa-regular fa-calendar-minus mr-1 text-indigo-500"></i> ${course.day || '-'}</div>
+                                <div><i class="fa-regular fa-clock mr-1 text-indigo-500"></i> ${course.time || '-'}</div>
+                            </div>
+                            <div class="truncate text-slate-500"><i class="fa-solid fa-map-location-dot mr-1 text-slate-400"></i> Ruang: ${course.room || '-'}</div>
+                            ${course.lecturer ? `<div class="truncate font-medium text-slate-600"><i class="fa-solid fa-chalkboard-user mr-1 text-slate-400"></i> ${course.lecturer}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                const cardHTML = `
+                <div onclick="openCourseDetail(${course.id})" class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 cursor-pointer hover:border-indigo-300 hover:shadow-md transition duration-200 space-y-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <h3 class="font-bold text-sm text-slate-800 break-words whitespace-normal leading-tight">${course.courseName}</h3>
+                        <span class="text-[10px] font-bold bg-indigo-50 border border-indigo-100 text-indigo-600 rounded px-1.5 py-0.5 whitespace-nowrap">ID: ${course.id}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 pt-2 border-t border-slate-100 space-y-2">
+                        ${schedulesHTML}
+                    </div>
+                </div>`;
+                
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        async function openCourseDetail(courseId) {
+            const course = ALL_COURSES.find(c => c.id === courseId);
+            if (!course) return;
+
+            viewCourses.classList.add('hidden');
+            viewCourseDetail.classList.remove('hidden');
+
+            let headerSchedulesHTML = '';
+            if (Array.isArray(course.schedules) && course.schedules.length > 0) {
+                headerSchedulesHTML = course.schedules.map(sch => `
+                    <div class="pt-1 border-t border-indigo-500/40 first:border-0 first:pt-0">
+                        <div class="flex justify-between">
+                            <span><i class="fa-solid fa-calendar mr-1"></i> ${sch.day || '-'}</span>
+                            <span><i class="fa-solid fa-clock mr-1"></i> ${sch.time || '-'}</span>
+                        </div>
+                        <div><i class="fa-solid fa-door-open mr-1"></i> Ruang: ${sch.room || '-'}</div>
+                    </div>
+                `).join('');
+            } else {
+                headerSchedulesHTML = `
+                    <div><i class="fa-solid fa-calendar mr-1"></i> ${course.day || '-'}</div>
+                    <div><i class="fa-solid fa-clock mr-1"></i> ${course.time || '-'}</div>
+                    <div><i class="fa-solid fa-door-open mr-1"></i> Ruang: ${course.room || '-'}</div>
+                `;
+            }
+
+            document.getElementById('detail-course-header').innerHTML = `
+            <h2 class="text-base font-bold leading-tight">${course.courseName}</h2>
+            <div class="mt-3 text-xs text-indigo-100 border-t border-indigo-500/40 pt-2.5 space-y-1.5">
+                ${headerSchedulesHTML}
+                ${course.lecturer ? `<div class="mt-1 font-medium text-white"><i class="fa-solid fa-user-tie mr-1.5"></i> ${course.lecturer}</div>` : ''}
+            </div>`;
+
+            const sessionContainer = document.getElementById('detail-session-container');
+            sessionContainer.innerHTML = `
+            <div class="text-center py-4 text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-circle-notch fa-spin mr-1.5 text-indigo-500"></i> Menyelidiki sesi terdekat di LMS LEAPS...
+            </div>`;
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/course-sessions?id=${courseId}`);
+                const result = await res.json();
+                if (result.success && result.data) {
+                    const session = result.data;
+                    const reschedBadge = session.rescheduled ? `<span class="text-[9px] bg-amber-100 border border-amber-200 text-amber-700 font-bold px-1.5 py-0.5 rounded"><i class="fa-solid fa-circle-exclamation mr-0.5"></i> Rescheduled</span>` : '';
+                    sessionContainer.innerHTML = `
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-sm font-bold text-slate-800">${session.sessionName}</span>
+                            ${reschedBadge}
+                        </div>
+                        <div class="text-xs text-slate-600 bg-slate-50 border border-slate-100 p-2.5 rounded-xl space-y-1">
+                            <div class="font-medium text-slate-700">${session.topic}</div>
+                            <div class="text-[11px] text-slate-400 mt-1">
+                                <i class="fa-solid fa-calendar-day mr-1"></i> ${session.dateText}
+                            </div>
+                            <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-clock text-indigo-500 mr-0.5"></i> Jam Sesi: <span class="text-slate-700 font-semibold">${session.timeText || 'N/A'}</span>
+                            </div>
+                            ${session.rescheduled && session.roomRescheduled && session.roomRescheduled !== 'N/A' ? `
+                            <div class="text-[11px] text-amber-600 font-medium flex items-center gap-1 bg-amber-50/60 border border-amber-100/50 px-1.5 py-0.5 rounded-md w-fit mt-0.5">
+                                <i class="fa-solid fa-map-pin text-amber-500 mr-0.5"></i> Ruang Pindah: <span class="text-amber-800 font-bold">${session.roomRescheduled}</span>
+                            </div>
+                            ` : ''}
+                            <div class="text-[11px] text-slate-400 pt-0.5">
+                                <i class="fa-solid fa-network-wired mr-1"></i> Format: <span class="font-semibold text-slate-600">${session.deliveryFormat}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    sessionContainer.innerHTML = `
+                    <div class="text-center py-2 text-xs text-rose-500 font-medium">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Sesi tidak ditemukan atau kelas selesai.
+                    </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                sessionContainer.innerHTML = `<div class="text-center py-2 text-xs text-rose-500">Gagal memuat detail sesi server.</div>`;
+            }
+        }
+
+function parseLeapsDate(dateStr) {
+    // Jika tidak ada string tanggal atau bernilai khusus/simulasi
+    if (!dateStr || dateStr.includes("Sedang") || dateStr.includes("Simulasi")) {
+        // Return tanggal jauh di masa depan (misal: akhir Juni 2026)
+        return new Date(2026, 5, 30, 23, 59);
+    }
+    
+    try {
+        // Pembersihan string dari spasi berlebih
+        const cleanStr = dateStr.trim();
+        const parts = cleanStr.split('-');
+        
+        if (parts.length < 2) return null;
+
+        const datePart = parts[0].trim(); // contoh: "15 Oct 2026"
+        const timePart = parts[1].trim(); // contoh: "23:59" atau "11:59 PM"
+
+        const dateParts = datePart.split(' ');
+        const day = parseInt(dateParts[0], 10);
+        
+        // Pemetaan bulan (case-insensitive)
+        const monthStr = dateParts[1].substring(0, 3).toLowerCase();
+        const months = { 
+            jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, 
+            jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 
+        };
+        const month = months[monthStr];
+        const year = parseInt(dateParts[2], 10);
+
+        let hour = 0;
+        let minute = 0;
+
+        // Penanganan format jam (dukungan AM/PM dan 24 jam)
+        if (timePart.toLowerCase().includes('am') || timePart.toLowerCase().includes('pm')) {
+            const isPM = timePart.toLowerCase().includes('pm');
+            const cleanTime = timePart.replace(/(am|pm)/i, '').trim();
+            const timeParts = cleanTime.split(':');
+            
+            hour = parseInt(timeParts[0], 10);
+            minute = parseInt(timeParts[1], 10);
+
+            if (isPM && hour < 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
+        } else {
+            const timeParts = timePart.split(':');
+            hour = parseInt(timeParts[0], 10);
+            minute = parseInt(timeParts[1], 10);
+        }
+
+        // Validasi jika hasil parse angka tidak valid
+        if (isNaN(day) || month === undefined || isNaN(year) || isNaN(hour) || isNaN(minute)) {
+            return null;
+        }
+
+        return new Date(year, month, day, hour, minute, 0, 0);
+    } catch (e) {
+        console.error("Gagal parse tanggal:", dateStr, e);
+        return null;
+    }
+}
+
+function formatCountdown(targetDateStr, statusUtama) {
+    const targetDate = parseLeapsDate(targetDateStr);
+    
+    // Jika format tanggal tidak valid / tidak bisa di-parse
+    if (!targetDate) {
+        return `<span class="text-slate-500 font-medium bg-slate-50 border border-slate-200 rounded px-2 py-1 block mt-2 text-[11px]"><i class="fa-regular fa-calendar mr-1"></i>Jadwal tidak valid</span>`;
+    }
+
+    const now = new Date();
+    
+    // Murni perbandingan milidetik
+    const diffMs = targetDate.getTime() - now.getTime();
+    
+    // LOGIKA PENENTU:
+    // isPassed = true HANYA jika waktu sekarang SUDAH MELETIHI targetDate (diffMs < 0)
+    const isPassed = diffMs < 0;
+    
+    // Ambil nilai absolut milidetik untuk konversi teks waktu
+    let absDiffSec = Math.floor(Math.abs(diffMs) / 1000);
+
+    // Hitung Hari, Jam, Menit, Detik secara presisi
+    const days = Math.floor(absDiffSec / (3600 * 24));
+    absDiffSec %= (3600 * 24);
+
+    const hours = Math.floor(absDiffSec / 3600);
+    absDiffSec %= 3600;
+
+    const minutes = Math.floor(absDiffSec / 60);
+    const seconds = absDiffSec % 60;
+
+    // Susun format teks waktu
+    const parts = [];
+    if (days > 0) parts.push(`${days} hari`);
+    if (hours > 0) parts.push(`${hours} jam`);
+    if (minutes > 0) parts.push(`${minutes} menit`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds} detik`);
+
+    const teksWaktu = parts.join(' ');
+
+    // LOGIKA PERBAIKAN TAMPILAN:
+    // Prioritas utama adalah pengecekan selisih waktu (!isPassed)
+    if (!isPassed) {
+        // BELUM PASSED (MASIH ADA WAKTU TERSISA)
+        return `<span class="text-amber-600 font-semibold bg-amber-50 border border-amber-100 rounded px-2 py-1 block mt-2 text-[11px]"><i class="fa-regular fa-clock mr-1"></i>Tersisa ${teksWaktu} sebelum deadline</span>`;
+    } else {
+        // SUDAH PASSED (LEWAT DEADLINE)
+        return `<span class="text-rose-600 font-semibold bg-rose-50 border border-rose-100 rounded px-2 py-1 block mt-2 text-[11px]"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Lewat deadline selama ${teksWaktu}</span>`;
+    }
+}
+
+        function populateFilterOptions() {
+            const filterSelect = document.getElementById('filter-course');
+            filterSelect.innerHTML = '<option value="all">Semua Mata Kuliah</option>';
+            const courses = [...new Set(ALL_TASKS.map(task => task.course))];
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                option.textContent = course;
+                filterSelect.appendChild(option);
+            });
+        }
+
+        function applyFilterAndSort() {
+            const container = document.getElementById('task-list');
+            if (!container) return;
+
+            const selectedCourse = document.getElementById('filter-course').value;
+            const selectedSort = document.getElementById('sort-date').value;
+            const startDateVal = document.getElementById('filter-start-date').value;
+            const endDateVal = document.getElementById('filter-end-date').value;
+
+            let filteredTasks = ALL_TASKS;
+
+            if (selectedCourse !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.course === selectedCourse);
+            }
+
+            if (startDateVal) {
+                const startDate = new Date(startDateVal);
+                startDate.setHours(0, 0, 0, 0);
+                filteredTasks = filteredTasks.filter(task => parseLeapsDate(task.dueDate) >= startDate);
+            }
+
+            if (endDateVal) {
+                const endDate = new Date(endDateVal);
+                endDate.setHours(23, 59, 59, 999);
+                filteredTasks = filteredTasks.filter(task => parseLeapsDate(task.dueDate) <= endDate);
+            }
+
+            filteredTasks.sort((a, b) => {
+                const dateA = parseLeapsDate(a.dueDate);
+                const dateB = parseLeapsDate(b.dueDate);
+                return selectedSort === 'near' ? dateA - dateB : dateB - dateA;
+            });
+
+            container.innerHTML = '';
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `
+                <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 text-center text-slate-400 text-sm">
+                    <i class="fa-solid fa-calendar-check text-emerald-500 text-xl block mb-2"></i> Tidak ada tugas untuk filter mata kuliah atau rentang waktu ini.
+                </div>`;
+                return;
+            }
+
+            filteredTasks.forEach(task => {
+                const statusUtama = task.status.split(' ')[0].trim();
+                let statusBadgeHTML = '';
+                let cardBorderClass = 'border-slate-200';
+                let iconClass = 'text-indigo-600 bg-indigo-50 border-indigo-100';
+
+                if (statusUtama === 'Active') {
+                    statusBadgeHTML = `<span class="text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 rounded px-2 py-0.5"><i class="fa-solid fa-unlock mr-1"></i>Bisa Disubmit</span>`;
+                    cardBorderClass = 'border-emerald-200 shadow-sm';
+                } else {
+                    statusBadgeHTML = `<span class="text-[11px] text-slate-500 font-bold bg-slate-100 border border-slate-200 rounded px-2 py-0.5"><i class="fa-solid fa-lock mr-1"></i>Sudah Ditutup</span>`;
+                    iconClass = 'text-slate-400 bg-slate-100 border-slate-200';
+                    cardBorderClass = 'border-slate-200 opacity-75';
+                }
+
+                const countdownHTML = formatCountdown(task.dueDate, statusUtama);
+                const cardHTML = `
+                <div class="bg-white border ${cardBorderClass} shadow-sm rounded-2xl overflow-hidden transition hover:shadow-md duration-200">
+                    <div class="bg-indigo-600 px-5 py-4 text-white relative">
+                        <h3 class="font-bold text-sm tracking-wide break-words whitespace-normal w-full">${task.course}</h3>
+                        <p class="text-[10px] text-indigo-100 mt-0.5 font-medium">Sistem Terintegrasi • Kelas Aktif</p>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start gap-3.5">
+                            <div class="p-2.5 border rounded-xl mt-0.5 ${iconClass}">
+                                <i class="fa-solid fa-file-signature text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-semibold text-slate-800 leading-snug">${task.title}</h4>
+                                <div class="mt-2.5 flex items-center justify-between gap-2">
+                                    <span class="text-[10px] text-slate-400 font-medium bg-slate-50 border border-slate-100 rounded px-2 py-0.5">DL: ${task.dueDate}</span>
+                                    ${statusBadgeHTML}
+                                </div>
+                                ${countdownHTML}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+    </script>
+</body>
+</html>
